@@ -3,11 +3,11 @@ package entities;
 import java.util.Date;
 
 public class Product {
-    private int id; //1
+    private String id; //1
     private String sku; //2
     private String name; //3
     private int type = 0; //4
-    private float price; //5
+    private String price; //5
     private int parent1 = 0; //6
     private int parent2 = 0; //7
     private int parent3 = 0; //8
@@ -15,7 +15,7 @@ public class Product {
     private final String reserved1=""; //10
     private final String reserved2=""; //11
     private int shelfLife; //12
-    private Date realisationDate; //13
+    private String realisationDate=""; //13
     private int labelCode = 0; //14
     private int isBlocked = 0; //15
     private int priceChangingFlag = 1; //16
@@ -39,11 +39,11 @@ public class Product {
     private int audioCode; //34
 
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -63,11 +63,11 @@ public class Product {
         this.name = name;
     }
 
-    public float getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 

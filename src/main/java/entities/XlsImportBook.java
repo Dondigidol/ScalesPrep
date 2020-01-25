@@ -25,34 +25,41 @@ public class XlsImportBook {
     }
 
     public void processing() throws IOException{
-
         getHeaders();
         int lastrow = sheet.getLastRowNum();
-
-        for(int i=1; i<= lastrow; i++){
+        for(int i=1; i<=lastrow; i++){
             Row row = sheet.getRow(i);
-            Product product = new Product();
-            product.setId(Integer.parseInt(row.getCell(labelColPos).getStringCellValue()));
-            product.setSku(row.getCell(skuColPos).getStringCellValue());
-            product.setName(row.getCell(nameColPos).getStringCellValue());
-            product.setPrice(Float.parseFloat(row.getCell(priceColPos).getStringCellValue()));
-            System.out.println(product.toString());
+            if (prepareCellValue(row.getCell(labelColPos))!=""){
+                Product product = new Product();
+                product.setId(prepareCellValue(row.getCell(labelColPos)));
+                product.setSku(prepareCellValue(row.getCell(skuColPos)));
+                product.setName(prepareCellValue(row.getCell(nameColPos)));
+                product.setPrice(prepareCellValue(row.getCell(priceColPos)).replace(",", "."));
+                System.out.println(product.toString());
+            }
         }
 
     }
 
-    public boolean isContains(String arr[], String value){
+    public String prepareCellValue(Cell cell){
+        String value;
+        DataFormatter formatter = new DataFormatter();
+        value = formatter.formatCellValue(cell).replace("\"", "");
+        return value;
+    }
+
+    public boolean isContains(String arr[], Cell cell){
         boolean returnValue = false;
-        value = value.toLowerCase();
+        String value2 = prepareCellValue(cell).toLowerCase();
         for(String arrValue:arr){
-            if(value.contains(arrValue)){
+            if(value2.contains(arrValue)){
                 returnValue =true;
             }
         }
         return returnValue;
     }
 
-    public void getHeaders(){
+    public void getHeaders() throws IOException{
         Row row = sheet.getRow(0);
         int lastcol = row.getLastCellNum();
         int tmpSkuColPos = -1;
@@ -63,25 +70,24 @@ public class XlsImportBook {
 
         for (int j=0; j<=lastcol; j++){
             Cell cell = row.getCell(j);
-            while (cell.getStringCellValue()!=null){
-                if (isContains(skuHeaders, cell.getStringCellValue())){
+            if(cell != null){
+                if (isContains(skuHeaders, cell)) {
                     tmpSkuColPos = j;
                     continue;
                 }
-                if (isContains(nameHeaders, cell.getStringCellValue())){
+                if (isContains(nameHeaders, cell)) {
                     tmpNameColPos = j;
                     continue;
                 }
-                if (isContains(priceHeaders, cell.getStringCellValue())){
+                if (isContains(priceHeaders, cell)) {
                     tmpPriceColPos = j;
                     continue;
                 }
-                if (isContains(labelHeaders, cell.getStringCellValue())){
+                if (isContains(labelHeaders, cell)) {
                     tmpLabelColPos = j;
                     continue;
                 }
             }
-
         }
 
         if ((tmpSkuColPos != -1) && (tmpNameColPos != -1) && (tmpPriceColPos != -1) && (tmpLabelColPos != -1)){
@@ -89,6 +95,8 @@ public class XlsImportBook {
             this.nameColPos = tmpNameColPos;
             this.priceColPos = tmpPriceColPos;
             this.labelColPos = tmpLabelColPos;
+        } else {
+            throw new IOException("Отсутствуют, либо неверные заголовки столбцов!");
         }
     }
 
