@@ -1,5 +1,4 @@
-import entities.XlsImportBook;
-import org.apache.commons.math3.analysis.function.Log;
+import services.XlsHandlingService;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -12,6 +11,7 @@ public class Application {
     public static void main(String[] args) throws IOException{
         try{
             LogManager.getLogManager().readConfiguration(Application.class.getResourceAsStream("/logging.properties"));
+            Application.class.getClassLoader().getResourceAsStream("/headers.properties");
         } catch (IOException e){
             System.err.println("Could not setup logger configuration: " + e.toString());
         }
@@ -23,7 +23,7 @@ public class Application {
             System.out.println("Положите файл \"data.xlsx\" с актуальными данными в текущую папку и нажмите клавишу \"Enter\"");
             Scanner scanner = new Scanner(System.in);
             scanner.nextLine();
-            XlsImportBook importBook = new XlsImportBook("data.xlsx");
+            XlsHandlingService importBook = new XlsHandlingService("data.xlsx");
             importBook.processing();
             isExist = true;
         } while (!isExist);

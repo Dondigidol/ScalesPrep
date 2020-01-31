@@ -1,16 +1,26 @@
-package entities;
+package services;
 
+import entities.Product;
+import org.apache.poi.sl.usermodel.ObjectMetaData;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class XlsImportBook {
-    private String fileName;
-    private final String skuHeaders[] = {"sku","шк","штрихкод","ean"};
-    private final String priceHeaders[] = {"price","цена","стоимость","руб"};
-    private final String nameHeaders[] = {"наименование","название","name","product"};
-    private final String labelHeaders[] = {"лоток","plu","лотка"};
+public class XlsHandlingService {
+    private static Logger log = Logger.getLogger(XlsHandlingService.class.getName());
+    private String fileName; // название обрабатываемого файла
+
+
+    private String skuHeaders[];// = headerProperties.getProperty("headers.sku").split(",");//{"sku","шк","штрихкод","ean"}; // массив для поиска столбца со штрихкодом
+    private String priceHeaders[];//= headerProperties.getProperty("headers.price").split(","); //{"price","цена","стоимость","руб"}; // массив для поиска столбца с ценой
+    private String nameHeaders[];// = headerProperties.getProperty("headers.name").split(","); //{"наименование","название","name","product"}; // массив для поиска столбца с наименованием
+    private String labelHeaders[];// = headerProperties.getProperty("headers.label").split(","); //{"лоток","plu","лотка"}; // массив для поиска столбца с номером лотка
     private Workbook workbook;
     private Sheet sheet;
     private Integer skuColPos = null;
@@ -18,10 +28,23 @@ public class XlsImportBook {
     private Integer priceColPos = null;
     private Integer labelColPos = null;
 
-    public XlsImportBook(String fileName) throws IOException{
+    public XlsHandlingService(String fileName) throws IOException{
         this.fileName = fileName;
         workbook = WorkbookFactory.create(new File(fileName));
         sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
+        try {
+            InputStream inputProperties = new FileInputStream("/headers.properties");
+            Properties headerProperties = new Properties();
+            headerProperties.load(inputProperties);
+            skuHeaders = headerProperties.getProperty("headers.sku").split(",");//{"sku","шк","штрихкод","ean"}; // массив для поиска столбца со штрихкодом
+            System.out.println(skuHeaders);
+            priceHeaders = headerProperties.getProperty("headers.price").split(","); //{"price","цена","стоимость","руб"}; // массив для поиска столбца с ценой
+            nameHeaders = headerProperties.getProperty("headers.name").split(","); //{"наименование","название","name","product"}; // массив для поиска столбца с наименованием
+            labelHeaders = headerProperties.getProperty("headers.label").split(","); //{"лоток","plu","лотка"}; // массив для поиска столбца с номером лотка
+
+        } catch (IOException e){
+            log.log(Level.SEVERE, "Ошибка! " + e.getMessage());
+        }
     }
 
     public void processing() throws IOException{
