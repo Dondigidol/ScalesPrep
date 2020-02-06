@@ -1,21 +1,19 @@
 package services;
 
-import entities.Product;
-import org.apache.poi.sl.usermodel.ObjectMetaData;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
 
-import java.io.*;
-import java.nio.Buffer;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
 
 public interface XlsHandlingService {
 
     void getHeaders() throws IOException;
     boolean isCellContains(String[] arr, Cell cell);
     String prepareCellValue(Cell cell);
-    void processing() throws IOException;
+
+    void proceed() throws IOException;
+    void headerHandling() throws IOException;
+    void groupHandling() throws IOException;
+    void productHandling() throws IOException;
 
 
 

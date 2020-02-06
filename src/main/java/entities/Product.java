@@ -87,6 +87,14 @@ public class Product {
         this.pictureCode = pictureCode;
     }
 
+    public int getParent1() {
+        return parent1;
+    }
+
+    public void setParent1(int parent1) {
+        this.parent1 = parent1;
+    }
+
     @Override
     public String toString() {
         return "<D " +

@@ -1,11 +1,13 @@
 package services;
 
+import entities.Group;
 import entities.Product;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,8 +15,9 @@ import java.util.logging.Logger;
 public class XlsHandlingServiceImpl implements XlsHandlingService{
     private static Logger log = Logger.getLogger(XlsHandlingServiceImpl.class.getName());
     private String fileName; // название обрабатываемого файла
-    Properties headerProperties = new Properties();
-
+    private ConfigurationLoaderService configurationLoaderService;
+    private Writer exportFileWriter;
+    List<Group> groupIds;
 
     private String[] skuHeaders;
     private String[] priceHeaders;
@@ -27,30 +30,77 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     private Integer priceColPos;
     private Integer labelColPos;
 
-    public XlsHandlingServiceImpl(String fileName) throws IOException{
-        this.fileName = fileName;
-        workbook = WorkbookFactory.create(new File(fileName));
+    public XlsHandlingServiceImpl() throws IOException{
+        configurationLoaderService = new ConfigurationLoaderService();
+        workbook = WorkbookFactory.create(new File(configurationLoaderService.getImportFileName()));
         sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
-        try {
-            InputStream  is= getClass().getResourceAsStream("/headers.properties");
-            InputStreamReader inputProperties = new InputStreamReader(is, "cp1251");
-            headerProperties = new Properties();
-            headerProperties.load(inputProperties);
-            skuHeaders = headerProperties.getProperty("headers.sku").split(",");
-            priceHeaders = headerProperties.getProperty("headers.price").split(",");
-            nameHeaders = headerProperties.getProperty("headers.name").split(",");
-            labelHeaders = headerProperties.getProperty("headers.label").split(",");
 
-        } catch (IOException e){
-            log.log(Level.SEVERE, "Ошибка! " + e.getMessage());
-        }
+
+
+        skuHeaders = configurationLoaderService.getSkuHeaders();
+        priceHeaders = configurationLoaderService.getPriceHeaders();
+        nameHeaders = configurationLoaderService.getNameHeaders();
+        labelHeaders = configurationLoaderService.getLabelHeaders();
+
+        exportFileWriter = new OutputStreamWriter(new FileOutputStream(configurationLoaderService.getExportFileName()), "cp1251");
+
+
     }
 
-    public void processing() throws IOException{
+    public void proceed() throws IOException{
+        headerHandling();
+        groupHandling();
+        productHandling();
+    }
+
+    public void headerHandling() throws IOException {
+        exportFileWriter.append("##@@&&");
+        exportFileWriter.append("\n");
+        exportFileWriter.append("#");
+        exportFileWriter.append("\n");
+        exportFileWriter.flush();
+    }
+
+    public void groupHandling() throws IOException{
         getHeaders();
         int lastrow = sheet.getLastRowNum();
+        int max = 0;
+        for (int i=1; i<lastrow; i++){
+            Row row = sheet.getRow(i);
+            int curCellValue = Integer.valueOf(prepareCellValue(row.getCell(labelColPos)));
+            if(max < curCellValue){
+                max = curCellValue;
+            }
+        }
+        System.out.println(max);
 
-        FileWriter fileWriter = new FileWriter("import.txt", false);
+        int groupCount = max / configurationLoaderService.getGroupBy();
+        System.out.println(groupCount);
+
+
+        groupIds = new ArrayList<>();
+
+        for (int i = 0; i <= groupCount; i++){
+            Group group = new Group();
+            group.setId(999999 - i);
+            int curGroupStartPos = configurationLoaderService.getGroupBy()*i+1;
+            int curGroupEndPos = curGroupStartPos + configurationLoaderService.getGroupBy() - 1;
+            group.setName(curGroupStartPos + " - " + curGroupEndPos);
+            groupIds.add(group);
+
+            exportFileWriter.append(group.toString());
+            exportFileWriter.append("\n");
+            exportFileWriter.flush();
+        }
+
+
+
+    }
+
+    public void productHandling() throws IOException{
+
+        int lastrow = sheet.getLastRowNum();
+
 
         for(int i=1; i<=lastrow; i++){
             Row row = sheet.getRow(i);
@@ -60,11 +110,17 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
                 product.setSku(prepareCellValue(row.getCell(skuColPos)));
                 product.setName(prepareCellValue(row.getCell(nameColPos)));
                 product.setPrice(prepareCellValue(row.getCell(priceColPos)).replace(",", "."));
-                fileWriter.append(product.toString());
-                fileWriter.append("\n");
+
+                int groupNum = Integer.valueOf(product.getId())/configurationLoaderService.getGroupBy();
+                product.setParent1(groupIds.get(groupNum).getId());
+
+
+                exportFileWriter.append(product.toString());
+                exportFileWriter.append("\n");
             }
         }
-        fileWriter.flush();
+        exportFileWriter.flush();
+
     }
 
     public String prepareCellValue(Cell cell){
@@ -119,10 +175,6 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
         } else {
             throw new IOException("Отсутствуют, либо неверные заголовки столбцов!");
         }
-    }
-
-    private void saveToTxt(){
-
     }
 
 }
