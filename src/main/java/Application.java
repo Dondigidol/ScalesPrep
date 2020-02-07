@@ -32,6 +32,7 @@ public class Application {
                 scanner.nextLine();
                 XlsHandlingService importBook = new XlsHandlingServiceImpl();
                 importBook.proceed();
+                importBook.saveToFile();
                 toContinue = false;
             }
         }catch (Exception e){

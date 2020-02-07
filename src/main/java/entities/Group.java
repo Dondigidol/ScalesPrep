@@ -2,7 +2,7 @@ package entities;
 
 public class Group {
     private int id;
-    private String group = "Группа";
+    private String group = "ОТДЕЛ";
     private String name = "";
     private int type = 2; // группа товаров
     private int price = 0;
@@ -14,6 +14,8 @@ public class Group {
 
     @Override
     public String toString(){
+        this.group = "ГРУППА";
+        this.parent1 = 0;
         return "<D " + id +
                 ";" + group +
                 ";" + name +

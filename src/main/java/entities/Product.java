@@ -95,6 +95,14 @@ public class Product {
         this.parent1 = parent1;
     }
 
+    public int getParent2() {
+        return parent2;
+    }
+
+    public void setParent2(int parent2) {
+        this.parent2 = parent2;
+    }
+
     @Override
     public String toString() {
         return "<D " +

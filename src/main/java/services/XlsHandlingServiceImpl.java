@@ -2,14 +2,13 @@ package services;
 
 import entities.Group;
 import entities.Product;
+import entities.ScalesConfiguration;
+import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class XlsHandlingServiceImpl implements XlsHandlingService{
@@ -17,7 +16,9 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     private String fileName; // название обрабатываемого файла
     private ConfigurationLoaderService configurationLoaderService;
     private Writer exportFileWriter;
-    List<Group> groupIds;
+    private List<Group> groupList =new ArrayList<>();
+    private List<ScalesConfiguration> configurationList = new ArrayList<>();
+    private List<Product> productList = new ArrayList<>();
 
     private String[] skuHeaders;
     private String[] priceHeaders;
@@ -35,8 +36,6 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
         workbook = WorkbookFactory.create(new File(configurationLoaderService.getImportFileName()));
         sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
 
-
-
         skuHeaders = configurationLoaderService.getSkuHeaders();
         priceHeaders = configurationLoaderService.getPriceHeaders();
         nameHeaders = configurationLoaderService.getNameHeaders();
@@ -48,17 +47,8 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     }
 
     public void proceed() throws IOException{
-        headerHandling();
         groupHandling();
         productHandling();
-    }
-
-    public void headerHandling() throws IOException {
-        exportFileWriter.append("##@@&&");
-        exportFileWriter.append("\n");
-        exportFileWriter.append("#");
-        exportFileWriter.append("\n");
-        exportFileWriter.flush();
     }
 
     public void groupHandling() throws IOException{
@@ -72,13 +62,8 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
                 max = curCellValue;
             }
         }
-        System.out.println(max);
 
         int groupCount = max / configurationLoaderService.getGroupBy();
-        System.out.println(groupCount);
-
-
-        groupIds = new ArrayList<>();
 
         for (int i = 0; i <= groupCount; i++){
             Group group = new Group();
@@ -86,21 +71,14 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
             int curGroupStartPos = configurationLoaderService.getGroupBy()*i+1;
             int curGroupEndPos = curGroupStartPos + configurationLoaderService.getGroupBy() - 1;
             group.setName(curGroupStartPos + " - " + curGroupEndPos);
-            groupIds.add(group);
-
-            exportFileWriter.append(group.toString());
-            exportFileWriter.append("\n");
-            exportFileWriter.flush();
+            configurationList.add(new ScalesConfiguration(450+i, group.getName()));
+            groupList.add(group);
         }
-
-
-
     }
 
-    public void productHandling() throws IOException{
+    public void productHandling(){
 
         int lastrow = sheet.getLastRowNum();
-
 
         for(int i=1; i<=lastrow; i++){
             Row row = sheet.getRow(i);
@@ -112,15 +90,12 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
                 product.setPrice(prepareCellValue(row.getCell(priceColPos)).replace(",", "."));
 
                 int groupNum = Integer.valueOf(product.getId())/configurationLoaderService.getGroupBy();
-                product.setParent1(groupIds.get(groupNum).getId());
+                product.setParent1(groupList.get(groupNum).getId());
+                product.setParent2(groupList.get(groupNum).getId());
 
-
-                exportFileWriter.append(product.toString());
-                exportFileWriter.append("\n");
+                productList.add(product);
             }
         }
-        exportFileWriter.flush();
-
     }
 
     public String prepareCellValue(Cell cell){
@@ -175,6 +150,34 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
         } else {
             throw new IOException("Отсутствуют, либо неверные заголовки столбцов!");
         }
+    }
+
+    public void saveToFile() throws IOException{
+        exportFileWriter.append("##@@&&");
+        exportFileWriter.append("\n");
+        exportFileWriter.append("#");
+        exportFileWriter.append("\n");
+        exportFileWriter.flush();
+
+        for (ScalesConfiguration configuration: configurationList){
+            exportFileWriter.append(configuration.toString());
+            exportFileWriter.append("\n");
+        }
+        exportFileWriter.flush();
+
+        for(Group group: groupList){
+            exportFileWriter.append(group.toString());
+            exportFileWriter.append("\n");
+        }
+        exportFileWriter.flush();
+
+        for (Product product: productList){
+            exportFileWriter.append(product.toString());
+            exportFileWriter.append("\n");
+        }
+        exportFileWriter.flush();
+
+
     }
 
 }

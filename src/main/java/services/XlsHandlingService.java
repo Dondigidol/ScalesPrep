@@ -11,9 +11,9 @@ public interface XlsHandlingService {
     String prepareCellValue(Cell cell);
 
     void proceed() throws IOException;
-    void headerHandling() throws IOException;
     void groupHandling() throws IOException;
-    void productHandling() throws IOException;
+    void productHandling();
+    void saveToFile() throws IOException;
 
 
 
