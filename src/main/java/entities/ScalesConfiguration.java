@@ -9,6 +9,10 @@ public class ScalesConfiguration {
         this.value=value;
     }
 
+    public ScalesConfiguration(){
+
+    }
+
     @Override
     public String toString(){
         return "<N " + this.id +

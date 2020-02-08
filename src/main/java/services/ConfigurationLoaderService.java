@@ -14,8 +14,11 @@ public class ConfigurationLoaderService {
     private String[] priceHeaders;
     private String[] nameHeaders;
     private String[] labelHeaders;
-    private boolean productGroup;
-    private int groupBy = 36;
+    private int groupBy;
+    private int buttonsXCount;
+    private int buttonsYCount;
+    private String scenarioFileName;
+    private int buttonMargin;
 
 
     public ConfigurationLoaderService() throws IOException{
@@ -31,8 +34,12 @@ public class ConfigurationLoaderService {
         setNameHeaders(properties.getProperty("import.file.headers.name").split(","));
         setPriceHeaders(properties.getProperty("import.file.headers.price").split(","));
         setSkuHeaders(properties.getProperty("import.file.headers.sku").split(","));
-        setProductGroup(Boolean.valueOf(properties.getProperty("scales.product.group")));
-        setGroupBy(Integer.valueOf(properties.getProperty("scales.product.groupBy")));
+        setGroupBy(Integer.valueOf(properties.getProperty("scenario.screen.matrix.horizontal")) *
+                Integer.valueOf(properties.getProperty("scenario.screen.matrix.vertical")));
+        setButtonsXCount(Integer.valueOf(properties.getProperty("scenario.screen.matrix.horizontal")));
+        setButtonsYCount(Integer.valueOf(properties.getProperty("scenario.screen.matrix.vertical")));
+        setScenarioFileName(properties.getProperty("scenario.file.name"));
+        setButtonMargin(Integer.valueOf(properties.getProperty("scenario.screen.button.margin")));
     }
 
     public String getImportFileName() {
@@ -83,19 +90,43 @@ public class ConfigurationLoaderService {
         this.labelHeaders = labelHeaders;
     }
 
-    public boolean getProductGroup() {
-        return productGroup;
-    }
-
-    public void setProductGroup(boolean productGroup) {
-        this.productGroup = productGroup;
-    }
-
     public int getGroupBy() {
         return groupBy;
     }
 
     public void setGroupBy(int groupBy) {
         this.groupBy = groupBy;
+    }
+
+    public int getButtonsXCount() {
+        return buttonsXCount;
+    }
+
+    public void setButtonsXCount(int buttonsXCount) {
+        this.buttonsXCount = buttonsXCount;
+    }
+
+    public int getButtonsYCount() {
+        return buttonsYCount;
+    }
+
+    public void setButtonsYCount(int buttonsYCount) {
+        this.buttonsYCount = buttonsYCount;
+    }
+
+    public String getScenarioFileName() {
+        return scenarioFileName;
+    }
+
+    public void setScenarioFileName(String scenarioFileName) {
+        this.scenarioFileName = scenarioFileName;
+    }
+
+    public int getButtonMargin() {
+        return buttonMargin;
+    }
+
+    public void setButtonMargin(int buttonMargin) {
+        this.buttonMargin = buttonMargin;
     }
 }

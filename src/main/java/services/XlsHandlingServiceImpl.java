@@ -20,6 +20,7 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     private List<ScalesConfiguration> configurationList = new ArrayList<>();
     private List<Product> productList = new ArrayList<>();
 
+
     private String[] skuHeaders;
     private String[] priceHeaders;
     private String[] nameHeaders;
@@ -47,8 +48,19 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     }
 
     public void proceed() throws IOException{
+        configurationHandling();
         groupHandling();
         productHandling();
+
+        ScenarioGenerator scenarioGenerator = new ScenarioGenerator(productList, groupList.size());
+        scenarioGenerator.generate();
+        scenarioGenerator.saveToFile();
+
+    }
+
+    private void configurationHandling(){
+        configurationList.add(new ScalesConfiguration(952, configurationLoaderService.getScenarioFileName())); // указываем в файле экспорта имя файла сценария
+        configurationList.add(new ScalesConfiguration(11, "1"));
     }
 
     public void groupHandling() throws IOException{
@@ -84,7 +96,7 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
             Row row = sheet.getRow(i);
             if (!prepareCellValue(row.getCell(labelColPos)).equals("")){
                 Product product = new Product();
-                product.setId(prepareCellValue(row.getCell(labelColPos)));
+                product.setId(Integer.valueOf(prepareCellValue(row.getCell(labelColPos))));
                 product.setSku(prepareCellValue(row.getCell(skuColPos)));
                 product.setName(prepareCellValue(row.getCell(nameColPos)));
                 product.setPrice(prepareCellValue(row.getCell(priceColPos)).replace(",", "."));

@@ -3,7 +3,7 @@ package entities;
 import java.util.Date;
 
 public class Product {
-    private String id; //1
+    private int id; //1
     private String sku; //2
     private String name; //3
     private int type = 0; //4
@@ -39,11 +39,11 @@ public class Product {
     private int audioCode; //34
 
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

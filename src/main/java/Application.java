@@ -1,4 +1,5 @@
 import services.ConfigurationLoaderService;
+import services.ScenarioGenerator;
 import services.XlsHandlingService;
 import services.XlsHandlingServiceImpl;
 
@@ -33,6 +34,8 @@ public class Application {
                 XlsHandlingService importBook = new XlsHandlingServiceImpl();
                 importBook.proceed();
                 importBook.saveToFile();
+
+
                 toContinue = false;
             }
         }catch (Exception e){

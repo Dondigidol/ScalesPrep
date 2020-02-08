@@ -19,4 +19,7 @@ public class Font {
                 ";" + name;
     }
 
+    public void setStyle(int style) {
+        this.style = style;
+    }
 }
