@@ -15,12 +15,12 @@ public class Application {
     private static Properties importProperties = new Properties();
     private static ConfigurationLoaderService configurationLoaderService;
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args){
         try{
             LogManager.getLogManager().readConfiguration(Application.class.getResourceAsStream("/logging.properties"));
             configurationLoaderService  = new ConfigurationLoaderService();
         } catch (IOException e){
-            log.log(Level.SEVERE, "Проблема с файлами конфигурации! " + e.getStackTrace());
+            log.log(Level.SEVERE, "Проблема с файлами конфигурации! " + e.getCause());
         }
 
 
@@ -40,7 +40,7 @@ public class Application {
             }
         }catch (Exception e){
             //log.log(Level.SEVERE, "Ошибка: "+e.getLocalizedMessage());
-            System.out.println(e.getMessage());
+           e.printStackTrace();
         }
         log.info("application stopped");
     }

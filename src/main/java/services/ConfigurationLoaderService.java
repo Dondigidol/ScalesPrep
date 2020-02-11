@@ -19,6 +19,11 @@ public class ConfigurationLoaderService {
     private int buttonsYCount;
     private String scenarioFileName;
     private int buttonMargin;
+    private int numberFontSize;
+    private int textFontSize;
+    private int headerFontSize;
+    private String ip;
+    private boolean autoimport;
 
 
     public ConfigurationLoaderService() throws IOException{
@@ -40,6 +45,11 @@ public class ConfigurationLoaderService {
         setButtonsYCount(Integer.valueOf(properties.getProperty("scenario.screen.matrix.vertical")));
         setScenarioFileName(properties.getProperty("scenario.file.name"));
         setButtonMargin(Integer.valueOf(properties.getProperty("scenario.screen.button.margin")));
+        setNumberFontSize(Integer.valueOf(properties.getProperty("scenario.screen.number.font.size")));
+        setTextFontSize(Integer.valueOf(properties.getProperty("scenario.screen.text.font.size")));
+        setHeaderFontSize(Integer.valueOf(properties.getProperty("scenario.screen.header.font.size")));
+        setIp(properties.getProperty("scales.configuration.ip"));
+        setAutoimport(Boolean.valueOf(properties.getProperty("scales.configuration.autoimport")));
     }
 
     public String getImportFileName() {
@@ -128,5 +138,45 @@ public class ConfigurationLoaderService {
 
     public void setButtonMargin(int buttonMargin) {
         this.buttonMargin = buttonMargin;
+    }
+
+    public int getNumberFontSize() {
+        return numberFontSize;
+    }
+
+    public void setNumberFontSize(int numberFontSize) {
+        this.numberFontSize = numberFontSize;
+    }
+
+    public int getTextFontSize() {
+        return textFontSize;
+    }
+
+    public void setTextFontSize(int textFontSize) {
+        this.textFontSize = textFontSize;
+    }
+
+    public int getHeaderFontSize() {
+        return headerFontSize;
+    }
+
+    public void setHeaderFontSize(int headerFontSize) {
+        this.headerFontSize = headerFontSize;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public boolean isAutoimport() {
+        return autoimport;
+    }
+
+    public void setAutoimport(boolean autoimport) {
+        this.autoimport = autoimport;
     }
 }

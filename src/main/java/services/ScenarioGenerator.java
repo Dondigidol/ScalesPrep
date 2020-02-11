@@ -19,13 +19,14 @@ public class ScenarioGenerator {
     private List<Window> windowList = new ArrayList<>();
     private List<Text> textList = new ArrayList<>();
     private List<Integer> idList = new ArrayList<>();
+    private List<Font> fontList = new ArrayList<>();
     private ConfigurationLoaderService configurationLoaderService;
     private Writer scenarioWriter;
     private int groupBy;
     private int groupCount;
     private static final int WINDOW_WIDTH = 1024;
     private static final int WINDOW_HEIGHT = 584;
-    private static final int MENU_HEIGHT = 100;
+    private static final int MENU_HEIGHT = 120;
     private static final int FIELDS_WIDTH = 100;
     private int buttonXCount;
     private int buttonYCount;
@@ -50,8 +51,10 @@ public class ScenarioGenerator {
     }
 
 
-    public void generate(){
+    public void generate() throws IOException{
         createWindows();
+        createFonts();
+        createHeaders();
 
         for (Product product: productList){
             createButton(product);
@@ -59,16 +62,12 @@ public class ScenarioGenerator {
     }
 
     public void saveToFile() throws IOException{
-        Font font = new Font(999999, 12);
-        Font font1 = new Font(999998, 36);
-        font1.setStyle(2);
 
-        scenarioWriter.append(font.toString());
-        scenarioWriter.append("\n");
-        scenarioWriter.append(font1.toString());
-        scenarioWriter.append("\n");
+        for(Font font: fontList){
+            scenarioWriter.append(font.toString());
+            scenarioWriter.append("\n");
+        }
         scenarioWriter.flush();
-
 
         for(Window window: windowList){
             scenarioWriter.append(window.toString());
@@ -88,6 +87,7 @@ public class ScenarioGenerator {
         }
         scenarioWriter.flush();
 
+        scenarioWriter.close();
 
     }
 
@@ -135,6 +135,63 @@ public class ScenarioGenerator {
         idList.add(text.getId());
 
         return 0;
+    }
+
+    private void createFonts(){
+        Font font = new Font(999999, configurationLoaderService.getTextFontSize());
+        Font font1 = new Font(999998, configurationLoaderService.getNumberFontSize());
+        Font font2 = new Font(999997, configurationLoaderService.getHeaderFontSize());
+        font2.setStyle(2);
+        fontList.add(font);
+        fontList.add(font1);
+        fontList.add(font2);
+
+    }
+
+    private void createHeaders(){
+        int buttonWidth = WINDOW_WIDTH/groupCount - buttonMargin;
+        int buttonDelta = 30;
+        int buttonHeight;
+
+        for (int i = 1; i<=groupCount; i++ ){
+            int parentId = windowList.get(i - 1).getId();
+            for (int j = 1; j<=groupCount; j++){
+                int buttonId = idList.get(idList.size() - 1) + 1;
+                Button button = new Button();
+                button.setId(buttonId);
+                button.setParent(parentId);
+                button.setActionId(2);
+                button.setActionValue(j);
+                int y;
+                if (i == j) {
+                    buttonHeight = MENU_HEIGHT-buttonDelta/2;
+                    y = buttonDelta/4;
+                } else {
+                    buttonHeight = MENU_HEIGHT - buttonDelta;
+                    y = buttonDelta/2;
+                }
+
+                int x = (j - 1)*(buttonMargin + buttonWidth) + buttonMargin + buttonMargin/groupCount;
+
+
+                button.setSize(x, y, buttonWidth, buttonHeight);
+
+                buttonList.add(button);
+                idList.add(button.getId());
+
+                int textId = idList.get(idList.size() - 1) + 1;
+
+                int curGroupStartPos = configurationLoaderService.getGroupBy()*(j - 1) + 1;
+                int curGroupEndPos = curGroupStartPos + configurationLoaderService.getGroupBy() - 1;
+                String label = curGroupStartPos + " - " + curGroupEndPos;
+
+                Text text = new Text(textId, button.getId(), label, 999997);
+                text.setSize(button.getX(), button.getY(), button.getWidth(), button.getHeight());
+
+                textList.add(text);
+                idList.add(text.getId());
+            }
+        }
     }
 
 

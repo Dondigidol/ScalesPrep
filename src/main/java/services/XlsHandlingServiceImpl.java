@@ -7,9 +7,14 @@ import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class XlsHandlingServiceImpl implements XlsHandlingService{
     private static Logger log = Logger.getLogger(XlsHandlingServiceImpl.class.getName());
@@ -75,9 +80,9 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
             }
         }
 
-        int groupCount = max / configurationLoaderService.getGroupBy();
+        int groupCount = (int)Math.ceil((double)max / configurationLoaderService.getGroupBy());
 
-        for (int i = 0; i <= groupCount; i++){
+        for (int i = 0; i < groupCount; i++){
             Group group = new Group();
             group.setId(999999 - i);
             int curGroupStartPos = configurationLoaderService.getGroupBy()*i+1;
@@ -102,8 +107,7 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
                 product.setPrice(prepareCellValue(row.getCell(priceColPos)).replace(",", "."));
 
                 int groupNum = Integer.valueOf(product.getId())/configurationLoaderService.getGroupBy();
-                product.setParent1(groupList.get(groupNum).getId());
-                product.setParent2(groupList.get(groupNum).getId());
+                product.setParent1(2);
 
                 productList.add(product);
             }
@@ -189,7 +193,24 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
         }
         exportFileWriter.flush();
 
+        exportFileWriter.close();
 
+        String exportPath = "\\\\" + configurationLoaderService.getIp() + "\\Shared\\Import\\";
+
+        if(configurationLoaderService.isAutoimport()){
+            String flagFileName = "PCScale.flz";
+            Writer writer = new OutputStreamWriter(new FileOutputStream(flagFileName));
+            writer.flush();
+            writer.close();
+            Path sourcePath = Path.of(flagFileName);
+            Path targetPath = Path.of(exportPath + flagFileName);
+            Files.move(sourcePath, targetPath, REPLACE_EXISTING);
+            log.log(Level.FINE,"Auto-import file (" + flagFileName + ") is copied to the scales successfully!");
+        }
+        Path sourcePath = Path.of(configurationLoaderService.getExportFileName());
+        Path targetPath = Path.of(exportPath + configurationLoaderService.getExportFileName());
+        Files.move(sourcePath, targetPath, REPLACE_EXISTING);
+        log.log(Level.FINE, "Import file (" + configurationLoaderService.getExportFileName() + ") is copied to the scales successfully!");
     }
 
 }

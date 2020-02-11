@@ -15,7 +15,7 @@ public class Group {
     @Override
     public String toString(){
         this.group = "ГРУППА";
-        this.parent1 = 0;
+        this.parent1 = id;
         return "<D " + id +
                 ";" + group +
                 ";" + name +
