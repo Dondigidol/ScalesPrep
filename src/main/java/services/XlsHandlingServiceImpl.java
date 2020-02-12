@@ -1,14 +1,13 @@
 package services;
 
-import entities.Group;
-import entities.Product;
-import entities.ScalesConfiguration;
+import entities.*;
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -24,7 +23,8 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     private List<Group> groupList =new ArrayList<>();
     private List<ScalesConfiguration> configurationList = new ArrayList<>();
     private List<Product> productList = new ArrayList<>();
-
+    private List<User> userList = new ArrayList<>();
+    private List<Label> labelList = new ArrayList<>();
 
     private String[] skuHeaders;
     private String[] priceHeaders;
@@ -36,6 +36,7 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     private Integer nameColPos;
     private Integer priceColPos;
     private Integer labelColPos;
+    private String flagFileName = "PCScale.flz";
 
     public XlsHandlingServiceImpl() throws IOException{
         configurationLoaderService = new ConfigurationLoaderService();
@@ -54,6 +55,8 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
 
     public void proceed() throws IOException{
         configurationHandling();
+        labelHandling();
+        userHandling();
         groupHandling();
         productHandling();
 
@@ -63,9 +66,34 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
 
     }
 
+    private void labelHandling(){
+        labelList.add(new Label(1, configurationLoaderService.getLabelName(), "Labels\\"+configurationLoaderService.getLabelProjectName()));
+    }
+
+    private void userHandling(){
+        userList.add(new User(1, 0, configurationLoaderService.getAdminName(), configurationLoaderService.getAdminPassword()));
+        userList.add(new User(2, 1, configurationLoaderService.getUserName(), configurationLoaderService.getUserPassword()));
+    }
+
     private void configurationHandling(){
         configurationList.add(new ScalesConfiguration(952, configurationLoaderService.getScenarioFileName())); // указываем в файле экспорта имя файла сценария
         configurationList.add(new ScalesConfiguration(11, "1"));
+        configurationList.add(new ScalesConfiguration(213, "1"));
+        configurationList.add(new ScalesConfiguration(27, "1"));
+        configurationList.add(new ScalesConfiguration(210,"1"));
+        configurationList.add(new ScalesConfiguration(202, configurationLoaderService.getShopName()));
+        configurationList.add(new ScalesConfiguration(7, "1"));
+        configurationList.add(new ScalesConfiguration(8,"1"));
+        configurationList.add(new ScalesConfiguration(40,"0"));
+        configurationList.add(new ScalesConfiguration(814, "1"));
+        configurationList.add(new ScalesConfiguration(815,"0"));
+        configurationList.add(new ScalesConfiguration(816,"1"));
+        configurationList.add(new ScalesConfiguration(817, "1"));
+        configurationList.add(new ScalesConfiguration(818, "1"));
+        if (configurationLoaderService.isAutoimport()){
+            configurationList.add(new ScalesConfiguration(954, "Import\\" + this.flagFileName));
+        }
+
     }
 
     public void groupHandling() throws IOException{
@@ -88,7 +116,7 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
             int curGroupStartPos = configurationLoaderService.getGroupBy()*i+1;
             int curGroupEndPos = curGroupStartPos + configurationLoaderService.getGroupBy() - 1;
             group.setName(curGroupStartPos + " - " + curGroupEndPos);
-            configurationList.add(new ScalesConfiguration(450+i, group.getName()));
+            //configurationList.add(new ScalesConfiguration(450+i, group.getName()));
             groupList.add(group);
         }
     }
@@ -169,6 +197,7 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
     }
 
     public void saveToFile() throws IOException{
+
         exportFileWriter.append("##@@&&");
         exportFileWriter.append("\n");
         exportFileWriter.append("#");
@@ -179,6 +208,13 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
             exportFileWriter.append(configuration.toString());
             exportFileWriter.append("\n");
         }
+        exportFileWriter.flush();
+
+        for (User user: userList){
+            exportFileWriter.append(user.toString());
+            exportFileWriter.append("\n");
+        }
+
         exportFileWriter.flush();
 
         for(Group group: groupList){
@@ -193,24 +229,51 @@ public class XlsHandlingServiceImpl implements XlsHandlingService{
         }
         exportFileWriter.flush();
 
+
+        for(Label label: labelList){
+            exportFileWriter.append(label.toString());
+            exportFileWriter.append("\n");
+        }
+        exportFileWriter.flush();
+
+        exportFileWriter.append("$$$CLR");
+        exportFileWriter.flush();
+
         exportFileWriter.close();
 
-        String exportPath = "\\\\" + configurationLoaderService.getIp() + "\\Shared\\Import\\";
-
         if(configurationLoaderService.isAutoimport()){
-            String flagFileName = "PCScale.flz";
-            Writer writer = new OutputStreamWriter(new FileOutputStream(flagFileName));
+            Writer writer = new OutputStreamWriter(new FileOutputStream(this.flagFileName));
             writer.flush();
             writer.close();
-            Path sourcePath = Path.of(flagFileName);
-            Path targetPath = Path.of(exportPath + flagFileName);
-            Files.move(sourcePath, targetPath, REPLACE_EXISTING);
-            log.log(Level.FINE,"Auto-import file (" + flagFileName + ") is copied to the scales successfully!");
+            Path sourcePath = Path.of(this.flagFileName);
+
+            for (String ip: configurationLoaderService.getIp()){
+                ip = ip.replace(" ", "");
+                Path targetPath = Path.of("\\\\" + ip + "\\Shared\\Import\\" + this.flagFileName);
+                Files.copy(sourcePath, targetPath, REPLACE_EXISTING);
+                log.log(Level.FINE,"Auto-import file (" + this.flagFileName + ") is copied to the scales (" + ip +") successfully!");
+            }
+            Files.delete(sourcePath);
         }
+
         Path sourcePath = Path.of(configurationLoaderService.getExportFileName());
-        Path targetPath = Path.of(exportPath + configurationLoaderService.getExportFileName());
-        Files.move(sourcePath, targetPath, REPLACE_EXISTING);
-        log.log(Level.FINE, "Import file (" + configurationLoaderService.getExportFileName() + ") is copied to the scales successfully!");
+        //Path labelSourcePath = Path.of("Labels");
+        File[] files = (new File("Labels")).listFiles();
+        for (String ip: configurationLoaderService.getIp()){
+            ip = ip.replace(" ", "");
+            Path targetPath = Path.of("\\\\" + ip + "\\Shared\\Import\\" + configurationLoaderService.getExportFileName());
+            Files.copy(sourcePath, targetPath, REPLACE_EXISTING);
+
+            for (File file: files){
+                Path labelSourcePath = Path.of("Labels\\" + file.getName());
+                Path labelTargetPath = Path.of("\\\\" + ip + "\\Shared\\Labels\\" + file.getName());
+                Files.copy(labelSourcePath, labelTargetPath, REPLACE_EXISTING);
+            }
+            log.log(Level.FINE, "Import file (" + configurationLoaderService.getExportFileName() + ") is copied to the scales ("+ip+") successfully!");
+        }
+        Files.delete(sourcePath);
+
+
     }
 
 }

@@ -22,8 +22,15 @@ public class ConfigurationLoaderService {
     private int numberFontSize;
     private int textFontSize;
     private int headerFontSize;
-    private String ip;
+    private String[] ip;
     private boolean autoimport;
+    private String adminName;
+    private String adminPassword;
+    private String userName;
+    private String userPassword;
+    private String labelName;
+    private String labelProjectName;
+    private String shopName;
 
 
     public ConfigurationLoaderService() throws IOException{
@@ -33,150 +40,121 @@ public class ConfigurationLoaderService {
         properties = new Properties();
         properties.load(inputProperties);
 
-        setImportFileName(properties.getProperty("import.file.name"));
-        setExportFileName(properties.getProperty("export.file.name"));
-        setLabelHeaders(properties.getProperty("import.file.headers.label").split(","));
-        setNameHeaders(properties.getProperty("import.file.headers.name").split(","));
-        setPriceHeaders(properties.getProperty("import.file.headers.price").split(","));
-        setSkuHeaders(properties.getProperty("import.file.headers.sku").split(","));
-        setGroupBy(Integer.valueOf(properties.getProperty("scenario.screen.matrix.horizontal")) *
-                Integer.valueOf(properties.getProperty("scenario.screen.matrix.vertical")));
-        setButtonsXCount(Integer.valueOf(properties.getProperty("scenario.screen.matrix.horizontal")));
-        setButtonsYCount(Integer.valueOf(properties.getProperty("scenario.screen.matrix.vertical")));
-        setScenarioFileName(properties.getProperty("scenario.file.name"));
-        setButtonMargin(Integer.valueOf(properties.getProperty("scenario.screen.button.margin")));
-        setNumberFontSize(Integer.valueOf(properties.getProperty("scenario.screen.number.font.size")));
-        setTextFontSize(Integer.valueOf(properties.getProperty("scenario.screen.text.font.size")));
-        setHeaderFontSize(Integer.valueOf(properties.getProperty("scenario.screen.header.font.size")));
-        setIp(properties.getProperty("scales.configuration.ip"));
-        setAutoimport(Boolean.valueOf(properties.getProperty("scales.configuration.autoimport")));
+        this.importFileName=properties.getProperty("import.file.name");
+        this.exportFileName = properties.getProperty("export.file.name");
+        this.labelHeaders = properties.getProperty("import.file.headers.label").split(",");
+        this.nameHeaders = properties.getProperty("import.file.headers.name").split(",");
+        this.priceHeaders = properties.getProperty("import.file.headers.price").split(",");
+        this.skuHeaders = properties.getProperty("import.file.headers.sku").split(",");
+        this.groupBy = Integer.valueOf(properties.getProperty("scenario.screen.matrix.horizontal")) *
+                Integer.valueOf(properties.getProperty("scenario.screen.matrix.vertical"));
+        this.buttonsXCount = Integer.valueOf(properties.getProperty("scenario.screen.matrix.horizontal"));
+        this.buttonsYCount = Integer.valueOf(properties.getProperty("scenario.screen.matrix.vertical"));
+        this.scenarioFileName = properties.getProperty("scenario.file.name");
+        this.buttonMargin = Integer.valueOf(properties.getProperty("scenario.screen.button.margin"));
+        this.numberFontSize = Integer.valueOf(properties.getProperty("scenario.screen.number.font.size"));
+        this.textFontSize = Integer.valueOf(properties.getProperty("scenario.screen.text.font.size"));
+        this.headerFontSize = Integer.valueOf(properties.getProperty("scenario.screen.header.font.size"));
+        this.ip = properties.getProperty("scales.configuration.ip").split(",");
+        this.autoimport = Boolean.valueOf(properties.getProperty("scales.configuration.autoimport"));
+        this.adminName = properties.getProperty("scales.configuration.admin");
+        this.adminPassword = properties.getProperty("scales.configuration.admin.password");
+        this.userName = properties.getProperty("scales.configuration.user");
+        this.userPassword = properties.getProperty("scales.configuration.user.password");
+        this.labelName = properties.getProperty("scales.label.name");
+        this.labelProjectName = properties.getProperty("scales.label.project.name");
+        this.shopName = properties.getProperty("scales.configuration.shop.name");
     }
 
     public String getImportFileName() {
         return importFileName;
     }
 
-    public void setImportFileName(String importFileName) {
-        this.importFileName = importFileName;
-    }
-
     public String getExportFileName() {
         return exportFileName;
-    }
-
-    public void setExportFileName(String exportFileName) {
-        this.exportFileName = exportFileName;
     }
 
     public String[] getSkuHeaders() {
         return skuHeaders;
     }
 
-    public void setSkuHeaders(String[] skuHeaders) {
-        this.skuHeaders = skuHeaders;
-    }
-
     public String[] getPriceHeaders() {
         return priceHeaders;
-    }
-
-    public void setPriceHeaders(String[] priceHeaders) {
-        this.priceHeaders = priceHeaders;
     }
 
     public String[] getNameHeaders() {
         return nameHeaders;
     }
 
-    public void setNameHeaders(String[] nameHeaders) {
-        this.nameHeaders = nameHeaders;
-    }
-
     public String[] getLabelHeaders() {
         return labelHeaders;
-    }
-
-    public void setLabelHeaders(String[] labelHeaders) {
-        this.labelHeaders = labelHeaders;
     }
 
     public int getGroupBy() {
         return groupBy;
     }
 
-    public void setGroupBy(int groupBy) {
-        this.groupBy = groupBy;
-    }
-
     public int getButtonsXCount() {
         return buttonsXCount;
-    }
-
-    public void setButtonsXCount(int buttonsXCount) {
-        this.buttonsXCount = buttonsXCount;
     }
 
     public int getButtonsYCount() {
         return buttonsYCount;
     }
 
-    public void setButtonsYCount(int buttonsYCount) {
-        this.buttonsYCount = buttonsYCount;
-    }
-
     public String getScenarioFileName() {
         return scenarioFileName;
-    }
-
-    public void setScenarioFileName(String scenarioFileName) {
-        this.scenarioFileName = scenarioFileName;
     }
 
     public int getButtonMargin() {
         return buttonMargin;
     }
 
-    public void setButtonMargin(int buttonMargin) {
-        this.buttonMargin = buttonMargin;
-    }
-
     public int getNumberFontSize() {
         return numberFontSize;
-    }
-
-    public void setNumberFontSize(int numberFontSize) {
-        this.numberFontSize = numberFontSize;
     }
 
     public int getTextFontSize() {
         return textFontSize;
     }
 
-    public void setTextFontSize(int textFontSize) {
-        this.textFontSize = textFontSize;
-    }
-
     public int getHeaderFontSize() {
         return headerFontSize;
     }
 
-    public void setHeaderFontSize(int headerFontSize) {
-        this.headerFontSize = headerFontSize;
-    }
-
-    public String getIp() {
+    public String[] getIp() {
         return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
     }
 
     public boolean isAutoimport() {
         return autoimport;
     }
 
-    public void setAutoimport(boolean autoimport) {
-        this.autoimport = autoimport;
+    public String getAdminName() {
+        return adminName;
+    }
+
+    public String getAdminPassword() {
+        return adminPassword;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    public String getLabelName() {
+        return labelName;
+    }
+
+    public String getLabelProjectName() {
+        return labelProjectName;
+    }
+
+    public String getShopName() {
+        return shopName;
     }
 }
