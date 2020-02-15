@@ -18,7 +18,7 @@ public class Product {
     private String realisationDate=""; //13
     private int labelCode = 0; //14
     private int isBlocked = 0; //15
-    private int priceChangingFlag = 1; //16
+    private int priceChangingFlag = 0; //16
     private String reserved3=""; //17
     private String reserved4=""; //18
     private String reserved5=""; //19
@@ -37,6 +37,7 @@ public class Product {
     private int messageFileCode; //32
     private int videoCode; //33
     private int audioCode; //34
+    private String lm;
 
 
     public int getId() {
@@ -101,6 +102,18 @@ public class Product {
 
     public void setParent2(int parent2) {
         this.parent2 = parent2;
+    }
+
+    public void setMessageCode(int messageCode) {
+        this.messageCode = messageCode;
+    }
+
+    public String getLm() {
+        return lm;
+    }
+
+    public void setLm(String lm) {
+        this.lm = lm;
     }
 
     @Override

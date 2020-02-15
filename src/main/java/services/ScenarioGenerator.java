@@ -10,10 +10,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ScenarioGenerator {
+    private static Logger log = Logger.getLogger(ScenarioGenerator.class.getName());
     private List<Product> productList;
     private List<Button> buttonList =new ArrayList<>();
     private List<Window> windowList = new ArrayList<>();
@@ -86,9 +94,17 @@ public class ScenarioGenerator {
             scenarioWriter.append("\n");
         }
         scenarioWriter.flush();
-
         scenarioWriter.close();
 
+        String[] ipList = configurationLoaderService.getIp();
+        Path sourcePath = Paths.get(configurationLoaderService.getScenarioFileName());
+        for(String ip: ipList){
+            ip = ip.replace(" ","");
+            Path targetPath = Paths.get("\\\\"+ip+"\\Shared\\SelfScenario\\" + configurationLoaderService.getScenarioFileName());
+            Files.copy(sourcePath, targetPath, REPLACE_EXISTING);
+        }
+        Files.delete(sourcePath);
+        log.info("Файл сценария скопирован в весы");
     }
 
     private void createWindows(){

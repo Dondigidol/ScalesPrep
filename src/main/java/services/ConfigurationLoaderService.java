@@ -1,5 +1,6 @@
 package services;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ public class ConfigurationLoaderService {
     private String importFileName;
     private String exportFileName;
     private Properties properties;
+    private String[] lmHeaders;
     private String[] skuHeaders;
     private String[] priceHeaders;
     private String[] nameHeaders;
@@ -34,14 +36,15 @@ public class ConfigurationLoaderService {
 
 
     public ConfigurationLoaderService() throws IOException{
-        InputStream isProperties = getClass().getResourceAsStream("/configuration.properties");
-        InputStreamReader inputProperties = new InputStreamReader(isProperties, "cp1251");
+        InputStream is = new FileInputStream("./config/configuration.properties");
+        InputStreamReader inputProperties = new InputStreamReader(is, "cp1251");
 
         properties = new Properties();
         properties.load(inputProperties);
 
         this.importFileName=properties.getProperty("import.file.name");
         this.exportFileName = properties.getProperty("export.file.name");
+        this.lmHeaders = properties.getProperty("import.file.headers.lm").split(",");
         this.labelHeaders = properties.getProperty("import.file.headers.label").split(",");
         this.nameHeaders = properties.getProperty("import.file.headers.name").split(",");
         this.priceHeaders = properties.getProperty("import.file.headers.price").split(",");
@@ -72,6 +75,10 @@ public class ConfigurationLoaderService {
 
     public String getExportFileName() {
         return exportFileName;
+    }
+
+    public String[] getLmHeaders(){
+        return this.lmHeaders;
     }
 
     public String[] getSkuHeaders() {

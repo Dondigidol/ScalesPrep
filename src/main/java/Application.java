@@ -1,11 +1,13 @@
 import services.ConfigurationLoaderService;
-import services.ScenarioGenerator;
 import services.XlsHandlingService;
-import services.XlsHandlingServiceImpl;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -17,32 +19,29 @@ public class Application {
 
     public static void main(String[] args){
         try{
-            LogManager.getLogManager().readConfiguration(Application.class.getResourceAsStream("/logging.properties"));
+            InputStream is = new FileInputStream("./config/logging.properties");
+            LogManager.getLogManager().readConfiguration(is);
             configurationLoaderService  = new ConfigurationLoaderService();
         } catch (IOException e){
-            log.log(Level.SEVERE, "Проблема с файлами конфигурации! " + e.getCause());
+            log.log(Level.SEVERE, "Проблема с файлами конфигурации! " + e.getMessage(), e);
         }
-
-
-        log.info("Запуск приложения...");
+        log.info("Программа запущена.");
         try {
-            boolean toContinue = true;
-            while (toContinue) {
-                System.out.println("Положите файл \"" + configurationLoaderService.getImportFileName() + "\" с актуальными данными в текущую папку и нажмите клавишу \"Enter\"");
-                Scanner scanner = new Scanner(System.in);
-                scanner.nextLine();
-                XlsHandlingService importBook = new XlsHandlingServiceImpl();
+            if (!Files.exists(Paths.get(configurationLoaderService.getImportFileName()))){
+                throw new IOException("Положите файл \"" + configurationLoaderService.getImportFileName() + "\" с актуальными данными в текущую папку и запустите приложение снова!");
+            } else {
+                System.out.println("Ждите...");
+                XlsHandlingService importBook = new XlsHandlingService();
                 importBook.proceed();
                 importBook.saveToFile();
-
-
-                toContinue = false;
+                System.out.println("Готово!");
             }
+
         }catch (Exception e){
-            //log.log(Level.SEVERE, "Ошибка: "+e.getLocalizedMessage());
-           e.printStackTrace();
+            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
         }
-        log.info("application stopped");
+        log.info("Приложение завершило свою работу.");
     }
 
 }
