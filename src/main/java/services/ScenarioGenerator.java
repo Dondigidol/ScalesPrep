@@ -96,15 +96,7 @@ public class ScenarioGenerator {
         scenarioWriter.flush();
         scenarioWriter.close();
 
-        String[] ipList = configurationLoaderService.getIp();
-        Path sourcePath = Paths.get(configurationLoaderService.getScenarioFileName());
-        for(String ip: ipList){
-            ip = ip.replace(" ","");
-            Path targetPath = Paths.get("\\\\"+ip+"\\Shared\\SelfScenario\\" + configurationLoaderService.getScenarioFileName());
-            Files.copy(sourcePath, targetPath, REPLACE_EXISTING);
-        }
-        Files.delete(sourcePath);
-        log.info("Файл сценария скопирован в весы");
+
     }
 
     private void createWindows(){
@@ -116,7 +108,7 @@ public class ScenarioGenerator {
     }
 
     private int createButton(Product product){
-        int buttonId = idList.get(idList.size() - 1) + 1;
+        int buttonId = idList.get(idList.size() - 1).intValue() + 1;
         int parent =  (product.getId() - 1)/groupBy;
 
         int positionOnWindow = product.getId() - (product.getId()-1)/groupBy * groupBy;

@@ -2,6 +2,7 @@ package services;
 
 import entities.*;
 import org.apache.poi.ss.usermodel.*;
+import sun.net.www.protocol.http.ntlm.NTLMAuthentication;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -207,6 +208,8 @@ public class XlsHandlingService {
 
     public void saveToFile() throws IOException{
 
+
+
         exportFileWriter.append("##@@&&");
         exportFileWriter.append("\n");
         exportFileWriter.append("#");
@@ -226,13 +229,6 @@ public class XlsHandlingService {
         }
         exportFileWriter.flush();
         log.info("Внесена информация о пользователях в файл импорта.");
-
-/*        for(Group group: groupList){
-            exportFileWriter.append(group.toString());
-            exportFileWriter.append("\n");
-        }
-        exportFileWriter.flush();
-        log.info("");*/
 
         int productCount=0;
         for (Product product: productList){
@@ -283,6 +279,7 @@ public class XlsHandlingService {
         String sourceImportPath = configurationLoaderService.getExportFileName();
         String sourceLabelPath = "Labels\\";
 
+        Path sourceScenarioPath = Paths.get(configurationLoaderService.getScenarioFileName());
         File[] files = (new File("Labels\\")).listFiles();
         for (String ip: configurationLoaderService.getIp()){
             String remoteImportPath = "\\\\" + ip + "\\Shared\\Import\\";
@@ -294,6 +291,14 @@ public class XlsHandlingService {
             Files.copy(Paths.get(sourceImportPath), targetImportPath, REPLACE_EXISTING);
             Files.delete(Paths.get(sourceImportPath));
             log.info("Файл импорта успешно скопирован в весы.");
+
+
+            ip = ip.replace(" ","");
+            Path targetPath = Paths.get("\\\\"+ip+"\\Shared\\SelfScenario\\" + configurationLoaderService.getScenarioFileName());
+            Files.copy(sourceScenarioPath, targetPath, REPLACE_EXISTING);
+
+            log.info("Файл сценария скопирован в весы (" +ip+")");
+
             for (File file: files){
                 deleteFiles(new File(remoteLabelPath+file.getName()));
 
@@ -311,8 +316,7 @@ public class XlsHandlingService {
             }
             log.info("Этикеткы успешно скопированы в весы.");
         }
-
-
+        Files.delete(sourceScenarioPath);
     }
 
     private void deleteFiles(File file){
