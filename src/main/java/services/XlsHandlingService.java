@@ -1,19 +1,17 @@
 package services;
 
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import entities.*;
 import org.apache.poi.ss.usermodel.*;
-import sun.net.www.protocol.http.ntlm.NTLMAuthentication;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class XlsHandlingService {
     private static Logger log = Logger.getLogger(XlsHandlingService.class.getName());
@@ -208,8 +206,6 @@ public class XlsHandlingService {
 
     public void saveToFile() throws IOException{
 
-
-
         exportFileWriter.append("##@@&&");
         exportFileWriter.append("\n");
         exportFileWriter.append("#");
@@ -265,58 +261,40 @@ public class XlsHandlingService {
             Writer writer = new OutputStreamWriter(new FileOutputStream(this.flagFileName));
             writer.flush();
             writer.close();
-            Path sourcePath = Paths.get(this.flagFileName);
-
-            for (String ip: configurationLoaderService.getIp()){
-                ip = ip.replace(" ", "");
-                Path targetPath = Paths.get("\\\\" + ip + "\\Shared\\Import\\" + this.flagFileName);
-                Files.copy(sourcePath, targetPath, REPLACE_EXISTING);
-                log.log(Level.FINE,"Файл автоимпорта (" + this.flagFileName + ") скопирован на (" + ip +") успешно!");
-            }
-            Files.delete(sourcePath);
         }
+
+        copyFiles();
+
+    }
+
+    private void copyFiles() throws IOException{
 
         String sourceImportPath = configurationLoaderService.getExportFileName();
-        String sourceLabelPath = "Labels\\";
+        String sourceFlagPath = this.flagFileName;
+        String sourceScenarioPath = configurationLoaderService.getScenarioFileName();
+        String sourceLabelsPath = "Labels";
 
-        Path sourceScenarioPath = Paths.get(configurationLoaderService.getScenarioFileName());
-        File[] files = (new File("Labels\\")).listFiles();
-        for (String ip: configurationLoaderService.getIp()){
-            String remoteImportPath = "\\\\" + ip + "\\Shared\\Import\\";
-            String remoteLabelPath = "\\\\" + ip + "\\Shared\\Labels\\";
+        String targetImportPath = "\\Import\\" + configurationLoaderService.getExportFileName();
+        String targetFlagPath = "\\Import\\" + this.flagFileName;
+        String targetScenarioPath = "\\SelfScenario\\" + configurationLoaderService.getScenarioFileName();
+        String targetLabelsPath = "\\Labels";
 
+        String[] ipList = configurationLoaderService.getIp();
+        for (String ip: ipList){
             ip = ip.replace(" ", "");
-
-            Path targetImportPath = Paths.get(remoteImportPath + configurationLoaderService.getExportFileName());
-            Files.copy(Paths.get(sourceImportPath), targetImportPath, REPLACE_EXISTING);
-            Files.delete(Paths.get(sourceImportPath));
-            log.info("Файл импорта успешно скопирован в весы.");
-
-
-            ip = ip.replace(" ","");
-            Path targetPath = Paths.get("\\\\"+ip+"\\Shared\\SelfScenario\\" + configurationLoaderService.getScenarioFileName());
-            Files.copy(sourceScenarioPath, targetPath, REPLACE_EXISTING);
-
-            log.info("Файл сценария скопирован в весы (" +ip+")");
-
-            for (File file: files){
-                deleteFiles(new File(remoteLabelPath+file.getName()));
-
-                Path targetLabelPath = Paths.get(remoteLabelPath + file.getName());
-                Files.copy(Paths.get(sourceLabelPath + file.getName()), targetLabelPath, REPLACE_EXISTING);
-
-                if (file.isDirectory()){
-                    File[] dirFiles = file.listFiles();
-                    for (File dirFile: dirFiles){
-                        Path dirSourcePath = Paths.get(sourceLabelPath + "\\"+ file.getName()+"\\" + dirFile.getName());
-                        Path dirTargetPath = Paths.get(targetLabelPath + "\\" + dirFile.getName());
-                        Files.copy(dirSourcePath, dirTargetPath, REPLACE_EXISTING);
-                    }
-                }
+            CopyService copyService = new CopyService(ip, "ven010", "Passwd039");
+            copyService.copyFile(sourceImportPath, targetImportPath);
+            copyService.copyFile(sourceScenarioPath, targetScenarioPath);
+            copyService.copyFolder(sourceLabelsPath, targetLabelsPath);
+            if (configurationLoaderService.isAutoimport()){
+                copyService.copyFile(sourceFlagPath, targetFlagPath);
             }
-            log.info("Этикеткы успешно скопированы в весы.");
+            copyService.close();
         }
-        Files.delete(sourceScenarioPath);
+        deleteFiles(new File(sourceFlagPath));
+        deleteFiles(new File(sourceImportPath));
+        deleteFiles(new File(sourceScenarioPath));
+
     }
 
     private void deleteFiles(File file){
