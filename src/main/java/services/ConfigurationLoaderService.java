@@ -33,6 +33,8 @@ public class ConfigurationLoaderService {
     private String labelName;
     private String labelProjectName;
     private String shopName;
+    private String scalesUsername;
+    private String scalesPassword;
 
 
     public ConfigurationLoaderService() throws IOException{
@@ -67,6 +69,8 @@ public class ConfigurationLoaderService {
         this.labelName = properties.getProperty("scales.label.name");
         this.labelProjectName = properties.getProperty("scales.label.project.name");
         this.shopName = properties.getProperty("scales.configuration.shop.name");
+        this.scalesUsername = properties.getProperty("scales.configuration.username");
+        this.scalesPassword = properties.getProperty("scales.configuration.password");
     }
 
     public String getImportFileName() {
@@ -163,5 +167,13 @@ public class ConfigurationLoaderService {
 
     public String getShopName() {
         return shopName;
+    }
+
+    public String getScalesUsername() {
+        return scalesUsername;
+    }
+
+    public String getScalesPassword() {
+        return scalesPassword;
     }
 }

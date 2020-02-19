@@ -40,7 +40,8 @@ public class CopyService {
     }
 
     public void copyFile(String source, String target) throws IOException{
-        target = disk + ":" + target;
+        //target = disk + ":" + target;
+        target = "\\\\10.84.79.62\\Shared\\" + target;
         copy(source, target);
     }
 
@@ -54,7 +55,8 @@ public class CopyService {
     }
 
     public void copyFolder(String source, String target) throws IOException{
-        target = disk + ":" + target;
+        //target = disk + ":" + target;
+        target = "\\\\10.84.79.62\\Shared\\" + target;
         File[] files = (new File(source)).listFiles();
         for (File file: files){
             if (file.isDirectory()){

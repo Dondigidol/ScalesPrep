@@ -282,7 +282,7 @@ public class XlsHandlingService {
         String[] ipList = configurationLoaderService.getIp();
         for (String ip: ipList){
             ip = ip.replace(" ", "");
-            CopyService copyService = new CopyService(ip, "ven010", "Passwd039");
+            CopyService copyService = new CopyService(ip, configurationLoaderService.getScalesUsername(), configurationLoaderService.getScalesPassword());
             copyService.copyFile(sourceImportPath, targetImportPath);
             copyService.copyFile(sourceScenarioPath, targetScenarioPath);
             copyService.copyFolder(sourceLabelsPath, targetLabelsPath);
